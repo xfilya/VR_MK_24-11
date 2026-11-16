@@ -21,6 +21,17 @@ public class Pistol : MonoBehaviour
     public bool IsBulletInChamber { get; set; }
     
     public PistolMag CurrentMag { get; private set; }
+
+    // Выстрел должен производится на триггер контроллера в котором находится пистолет
+    public void Shoot()
+    {
+        if (!IsBulletInChamber)
+        {
+            // холостой звук
+            return;
+        }
+        // выстрел
+    }
     
     public void AcceptMag(PistolMag mag)
     {
@@ -28,6 +39,7 @@ public class Pistol : MonoBehaviour
         {
             return;
         }
+        
         CurrentMag = mag;
         CurrentMag.SlideIn(_magOutPos.rotation, _magOutPos.position, _magInsertedPos.position);
     }
@@ -38,6 +50,7 @@ public class Pistol : MonoBehaviour
         {
             return;
         }
+        
         CurrentMag.SlideOut(_magOutPos.position);
         CurrentMag = null;
     }

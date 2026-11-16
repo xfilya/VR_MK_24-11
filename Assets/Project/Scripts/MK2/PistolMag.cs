@@ -71,6 +71,7 @@ public class PistolMag : MonoBehaviour
             IsInside = true;
             gameObject.layer = LayerMask.NameToLayer("Pistol");
         };
+        // звук входа магазина
     }
 
     // слайд из пистолета наружу при нажатии на выпуск магазина
@@ -84,6 +85,7 @@ public class PistolMag : MonoBehaviour
         s.AppendCallback(() => _rb.AddForce(-transform.up, ForceMode.Impulse));
         s.AppendInterval(1);
         s.AppendCallback(() => gameObject.layer = LayerMask.NameToLayer("Mag"));
+        // звук выхода магазина
         
         
         // сюда еще надо s.AppendCallback() чтобы включалась возможность брать магазин
