@@ -1,3 +1,4 @@
+using Sounds;
 using UnityEngine;
 
 public class Pistol : MonoBehaviour
@@ -6,6 +7,8 @@ public class Pistol : MonoBehaviour
     [SerializeField] private Transform _magOutPos;
 
     [SerializeField] private GameObject _laser;
+    [SerializeField] private SoundObject _shotSound;
+    [SerializeField] private SoundObject _dryFireSound;
     
     private bool _isPickedUp = false;
     public bool IsPickedUp
@@ -27,14 +30,13 @@ public class Pistol : MonoBehaviour
     {
         if (!IsBulletInChamber)
         {
-            // холостой звук
+            _dryFireSound.Play();
             return;
         }
 
         IsBulletInChamber = false;
-        // звук выстрела
+        _shotSound.Play();
         // Здесь выполняется логика самого выстрела.
-
         // Автоматика досылает следующий патрон из установленного магазина.
         LoadBulletIntoChamber();
     }

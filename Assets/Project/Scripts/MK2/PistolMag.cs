@@ -1,12 +1,16 @@
 using System;
 using DG.Tweening;
+using Sounds;
 using UnityEngine;
 
 public class PistolMag : MonoBehaviour
 {
     [SerializeField] private GameObject _bullet1;
     [SerializeField] private GameObject _bullet2;
-
+    [SerializeField] private SoundObject _insertSound;
+    [SerializeField] private SoundObject _releaseSound;
+    
+    
     [SerializeField] private int _capacity = 7;
     private int _ammoAmount;
     public int AmmoAmount
@@ -65,13 +69,13 @@ public class PistolMag : MonoBehaviour
         //тут еще надо чтобы отключалась возможность брать магазин
         
         // ставим на стартовую позицию и твином перемещаем внутрь пистолета
+        _insertSound.Play();
         transform.SetPositionAndRotation(from, rotation);
         transform.DOMove(to, 0.3f).SetEase(Ease.Linear).onComplete += () =>
         {
             IsInside = true;
             gameObject.layer = LayerMask.NameToLayer("Pistol");
         };
-        // звук входа магазина
     }
 
     // слайд из пистолета наружу при нажатии на выпуск магазина
@@ -80,13 +84,12 @@ public class PistolMag : MonoBehaviour
     {
         IsInside = false;
         Sequence s = DOTween.Sequence();
-        s.Append(transform.DOMove(to, 0.3f).SetEase(Ease.Linear));
+        s.AppendCallback(() => _releaseSound.Play());
+        s.Append(transform.DOMove(to, 0.1f).SetEase(Ease.Linear));
         s.AppendCallback(EnableRbAndCollision);
         s.AppendCallback(() => _rb.AddForce(-transform.up, ForceMode.Impulse));
         s.AppendInterval(1);
         s.AppendCallback(() => gameObject.layer = LayerMask.NameToLayer("Mag"));
-        // звук выхода магазина
-        
         
         // сюда еще надо s.AppendCallback() чтобы включалась возможность брать магазин
         

@@ -1,3 +1,4 @@
+using Sounds;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -10,7 +11,8 @@ public class PistolSlide : MonoBehaviour
     [SerializeField] private Transform endPos;
     [SerializeField] private Camera _interactionCamera;
     [SerializeField] private Pistol _pistol;
-
+    [SerializeField] private SoundObject _slideSound;
+    
     private XRGrabInteractable _grab;
     private Transform _grabAttach;
     private Rigidbody _rigidbody;
@@ -194,6 +196,7 @@ public class PistolSlide : MonoBehaviour
         { 
             Debug.Log("Trying to load bullet into chamber");
             _pistol.LoadBulletIntoChamber();
+            _slideSound.Play();
         }
     }
 }
