@@ -129,16 +129,16 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7285505742920692873}
-  - {fileID: 3349000412020524677}
-  - {fileID: 1192525484501280301}
-  - {fileID: 3299952584865876150}
+  - {fileID: 7054072660762753507}
+  - {fileID: 168007634578524751}
   - {fileID: 2500040782262080640}
   - {fileID: 8592287709252304857}
   - {fileID: 1785402475015332438}
-  - {fileID: 7054072660762753507}
-  - {fileID: 168007634578524751}
   - {fileID: 6692266774206258862}
   - {fileID: 4779698121428279437}
+  - {fileID: 1192525484501280301}
+  - {fileID: 3349000412020524677}
+  - {fileID: 3299952584865876150}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1657652852729121771
@@ -171,7 +171,7 @@ GameObject:
   - component: {fileID: 5097980698676867405}
   - component: {fileID: 8044455777314434303}
   m_Layer: 6
-  m_Name: lower
+  m_Name: Lower Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -485,7 +485,7 @@ Transform:
   m_GameObject: {fileID: 4755059067763058860}
   serializedVersion: 2
   m_LocalRotation: {x: 0.19868143, y: 0, z: -0, w: 0.98006415}
-  m_LocalPosition: {x: -6.19802e-19, y: -0.033081263, z: -0.012313895}
+  m_LocalPosition: {x: 0, y: -0.033081263, z: -0.012313895}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -624,7 +624,7 @@ GameObject:
   - component: {fileID: 4729874092489842549}
   - component: {fileID: 1355457130320445263}
   m_Layer: 6
-  m_Name: trigger
+  m_Name: Trigger Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -639,7 +639,7 @@ Transform:
   m_GameObject: {fileID: 6610375551486860111}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.19802e-19, y: 0.03531644, z: 0.0703904}
+  m_LocalPosition: {x: 0, y: 0.03531644, z: 0.0703904}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1036,7 +1036,7 @@ GameObject:
   - component: {fileID: 7013386490854172302}
   - component: {fileID: 7013386490854172303}
   m_Layer: 6
-  m_Name: slide
+  m_Name: Slide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1132,6 +1132,7 @@ MonoBehaviour:
   _interactionCamera: {fileID: 0}
   _pistol: {fileID: 1657652852729121771}
   _slideSound: {fileID: 3007415125530805922}
+  _recoilDuration: 0.05
 --- !u!64 &7013386490854172301
 MeshCollider:
   m_ObjectHideFlags: 0

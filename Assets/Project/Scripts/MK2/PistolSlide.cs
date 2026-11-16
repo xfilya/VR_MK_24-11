@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Sounds;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -12,6 +13,7 @@ public class PistolSlide : MonoBehaviour
     [SerializeField] private Camera _interactionCamera;
     [SerializeField] private Pistol _pistol;
     [SerializeField] private SoundObject _slideSound;
+    [SerializeField, Min(0.01f)] private float _recoilDuration = 0.1f;
     
     private XRGrabInteractable _grab;
     private Transform _grabAttach;
@@ -23,6 +25,7 @@ public class PistolSlide : MonoBehaviour
     private Vector2 _mouseStartPosition;
     private Vector2 _mouseDragAxis;
     private float _mouseDragLength;
+    private Sequence _recoilSequence;
 
     private void Awake()
     {
@@ -55,6 +58,22 @@ public class PistolSlide : MonoBehaviour
         _grab.trackRotation = false;
         _grab.selectEntered.AddListener(BeginDrag);
         _grab.selectExited.AddListener(EndDrag);
+    }
+
+    private void OnEnable()
+    {
+        if (!_pistol)
+            _pistol = GetComponentInParent<Pistol>();
+        if (_pistol)
+            _pistol.OnShoot += PlayRecoil;
+    }
+
+    private void OnDisable()
+    {
+        if (_pistol)
+            _pistol.OnShoot -= PlayRecoil;
+
+        _recoilSequence?.Kill();
     }
 
     private void OnDestroy()
@@ -198,5 +217,17 @@ public class PistolSlide : MonoBehaviour
             _pistol.LoadBulletIntoChamber();
             _slideSound.Play();
         }
+    }
+
+    private void PlayRecoil()
+    {
+        if (!startPos || !endPos || (_grab && _grab.isSelected) || _mouseDragging)
+            return;
+
+        _recoilSequence?.Kill();
+        transform.position = startPos.position;
+        _recoilSequence = DOTween.Sequence()
+            .Append(transform.DOMove(endPos.position, _recoilDuration * 0.4f).SetEase(Ease.Linear))
+            .Append(transform.DOMove(startPos.position, _recoilDuration * 0.6f).SetEase(Ease.Linear));
     }
 }

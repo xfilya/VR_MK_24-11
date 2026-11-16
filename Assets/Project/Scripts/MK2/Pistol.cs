@@ -1,3 +1,4 @@
+using System;
 using Sounds;
 using UnityEngine;
 
@@ -25,6 +26,8 @@ public class Pistol : MonoBehaviour
     
     public PistolMag CurrentMag { get; private set; }
 
+    public event Action OnShoot;
+
     // Выстрел должен производится на триггер контроллера в котором находится пистолет
     public void Shoot()
     {
@@ -36,8 +39,10 @@ public class Pistol : MonoBehaviour
 
         IsBulletInChamber = false;
         _shotSound.Play();
+        OnShoot?.Invoke();
+        
         // Здесь выполняется логика самого выстрела.
-        // Автоматика досылает следующий патрон из установленного магазина.
+        
         LoadBulletIntoChamber();
     }
 
@@ -60,7 +65,8 @@ public class Pistol : MonoBehaviour
         }
         
         CurrentMag = mag;
-        CurrentMag.SlideIn(_magOutPos.rotation, _magOutPos.position, _magInsertedPos.position);
+        CurrentMag.transform.parent = transform;
+        CurrentMag.SlideIn(_magOutPos.localRotation, _magOutPos.localPosition, _magInsertedPos.localPosition);
     }
 
     public void ReleaseMag()

@@ -70,8 +70,8 @@ public class PistolMag : MonoBehaviour
         
         // ставим на стартовую позицию и твином перемещаем внутрь пистолета
         _insertSound.Play();
-        transform.SetPositionAndRotation(from, rotation);
-        transform.DOMove(to, 0.3f).SetEase(Ease.Linear).onComplete += () =>
+        transform.SetLocalPositionAndRotation(from, rotation);
+        transform.DOLocalMove(to, 0.3f).SetEase(Ease.Linear).onComplete += () =>
         {
             IsInside = true;
             gameObject.layer = LayerMask.NameToLayer("Pistol");
@@ -87,6 +87,7 @@ public class PistolMag : MonoBehaviour
         s.AppendCallback(() => _releaseSound.Play());
         s.Append(transform.DOMove(to, 0.1f).SetEase(Ease.Linear));
         s.AppendCallback(EnableRbAndCollision);
+        s.AppendCallback(() => transform.parent = null);
         s.AppendCallback(() => _rb.AddForce(-transform.up, ForceMode.Impulse));
         s.AppendInterval(1);
         s.AppendCallback(() => gameObject.layer = LayerMask.NameToLayer("Mag"));

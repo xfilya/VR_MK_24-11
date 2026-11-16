@@ -505,7 +505,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2091323007910247414, guid: 3726875450cf7d4288b2c7cbec83b2be, type: 3}
       propertyPath: m_Name
-      value: pistol
+      value: Pistol
       objectReference: {fileID: 0}
     - target: {fileID: 4762505131109433935, guid: 3726875450cf7d4288b2c7cbec83b2be, type: 3}
       propertyPath: m_LocalPosition.x
@@ -578,7 +578,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8852161931123903041, guid: 6cd6c3a0fe9080a029af6f28ff7362b0, type: 3}
       propertyPath: m_Name
-      value: mag
+      value: Pistol Mag
       objectReference: {fileID: 0}
     - target: {fileID: 9145303576274854754, guid: 6cd6c3a0fe9080a029af6f28ff7362b0, type: 3}
       propertyPath: m_LocalPosition.x
