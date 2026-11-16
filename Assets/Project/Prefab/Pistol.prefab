@@ -488,6 +488,9 @@ GameObject:
   - component: {fileID: 4828204959981237695}
   - component: {fileID: 3136501521477372640}
   - component: {fileID: 5692235404639826385}
+  - component: {fileID: 7013386490854172301}
+  - component: {fileID: 7013386490854172302}
+  - component: {fileID: 7013386490854172303}
   m_Layer: 6
   m_Name: slide
   m_TagString: Untagged
@@ -579,3 +582,81 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a8c063b344a13e829eeec65109ab261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PistolSlide
+  startPos: {fileID: 0}
+  endPos: {fileID: 0}
+  _slideDirection: {x: 0, y: 0, z: -1}
+  _slideDistance: 0.04
+--- !u!64 &7013386490854172301
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8442302782702263933}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -8380061810295591180, guid: 17a792d9a4c5be480b34134a07ae122b, type: 3}
+--- !u!54 &7013386490854172302
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8442302782702263933}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &7013386490854172303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8442302782702263933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ad34abafad169848a38072baa96cdb2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_InteractionManager: {fileID: 0}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 1
+  m_SelectMode: 0
+  m_UseDynamicAttach: 1
+  m_MatchAttachPosition: 1
+  m_MatchAttachRotation: 1
+  m_MovementType: 1
+  m_TrackPosition: 0
+  m_TrackRotation: 0
+  m_TrackScale: 1
+  m_ThrowOnDetach: 0
