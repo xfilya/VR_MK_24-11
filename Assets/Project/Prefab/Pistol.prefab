@@ -648,6 +648,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PistolSlide
   startPos: {fileID: 8592287709252304857}
   endPos: {fileID: 1785402475015332438}
+  _interactionCamera: {fileID: 0}
+  _pistol: {fileID: 1657652852729121771}
 --- !u!64 &7013386490854172301
 MeshCollider:
   m_ObjectHideFlags: 0

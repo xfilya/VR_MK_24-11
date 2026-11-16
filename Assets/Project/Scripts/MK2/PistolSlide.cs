@@ -190,10 +190,10 @@ public class PistolSlide : MonoBehaviour
 
     public void Slide()
     {
-        if (_pistol.IsBulletInChamber)
-        {
-            
+        if (_pistol)
+        { 
+            Debug.Log("Trying to load bullet into chamber");
+            _pistol.LoadBulletIntoChamber();
         }
-        else{}
     }
 }

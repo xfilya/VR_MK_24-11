@@ -30,11 +30,23 @@ public class PistolEditor : Editor
     {
         DrawDefaultInspector();
 
+        var pistol = (Pistol)target;
+        EditorGUILayout.Space();
+        using (new EditorGUI.DisabledScope(true))
+        {
+            EditorGUILayout.Toggle("Is Bullet In Chamber", pistol.IsBulletInChamber);
+            EditorGUILayout.ObjectField("Current Mag", pistol.CurrentMag, typeof(PistolMag), true);
+            if (pistol.CurrentMag != null)
+                EditorGUILayout.IntField("Bullet Amount", pistol.CurrentMag.AmmoAmount);
+        }
+
         EditorGUILayout.Space();
         using (new EditorGUI.DisabledScope(!EditorApplication.isPlaying))
         {
+            if (GUILayout.Button("Shoot"))
+                pistol.Shoot();
             if (GUILayout.Button("ReleaseMag"))
-                ((Pistol)target).ReleaseMag();
+                pistol.ReleaseMag();
         }
     }
 }

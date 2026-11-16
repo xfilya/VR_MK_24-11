@@ -35,7 +35,7 @@ public class PistolMag : MonoBehaviour
         _col = GetComponent<BoxCollider>();
     }
 
-    public bool TryShoot()
+    public bool TryFeedBullet()
     {
         if (AmmoAmount > 0 && IsInside)
         {

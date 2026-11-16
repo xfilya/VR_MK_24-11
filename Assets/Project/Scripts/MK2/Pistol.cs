@@ -18,7 +18,7 @@ public class Pistol : MonoBehaviour
         }
     }
 
-    public bool IsBulletInChamber { get; set; }
+    public bool IsBulletInChamber { get; private set; }
     
     public PistolMag CurrentMag { get; private set; }
 
@@ -30,7 +30,24 @@ public class Pistol : MonoBehaviour
             // холостой звук
             return;
         }
-        // выстрел
+
+        IsBulletInChamber = false;
+        // звук выстрела
+        // Здесь выполняется логика самого выстрела.
+
+        // Автоматика досылает следующий патрон из установленного магазина.
+        LoadBulletIntoChamber();
+    }
+
+    public void LoadBulletIntoChamber()
+    {
+        if (IsBulletInChamber || CurrentMag == null || !CurrentMag.TryFeedBullet())
+        {
+            return;
+        }
+
+        Debug.Log("Loaded");
+        IsBulletInChamber = true;
     }
     
     public void AcceptMag(PistolMag mag)
