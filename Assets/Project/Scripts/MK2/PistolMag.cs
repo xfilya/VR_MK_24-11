@@ -47,7 +47,12 @@ public class PistolMag : MonoBehaviour
 
     public void EjectBullet()
     {
-        AmmoAmount--;
+        AmmoAmount = Mathf.Max(0, AmmoAmount - 1);
+    }
+
+    public void AddBullet()
+    {
+        AmmoAmount = Mathf.Min(_capacity, AmmoAmount + 1);
     }
     
     // слайд внутрь пистолета когда магазин в зоне тригера
@@ -77,6 +82,7 @@ public class PistolMag : MonoBehaviour
         s.Append(transform.DOMove(to, 0.3f).SetEase(Ease.Linear));
         s.AppendCallback(EnableRbAndCollision);
         s.AppendCallback(() => _rb.AddForce(-transform.up, ForceMode.Impulse));
+        s.AppendInterval(1);
         s.AppendCallback(() => gameObject.layer = LayerMask.NameToLayer("Mag"));
         
         
