@@ -20,35 +20,48 @@ namespace OrbitLanes
         public int Throws { get; private set; }
         public int Round { get; private set; } = 1;
         public bool Scoring { get; private set; }
-        bool nextRack, muted;
+        bool muted;
         float lastChange;
         OrbitPin[] pins;
         OrbitBall[] balls;
+        float rackEnd;
 
         void Start()
         {
             pins = FindObjectsByType<OrbitPin>();
             balls = FindObjectsByType<OrbitBall>();
+            if (launch && pins.Length > 0)
+                rackEnd = pins.Max(p => Vector3.Dot(p.transform.position - launch.position, launch.forward)) + .65f;
+            if (!decor) decor = FindAnyObjectByType<OrbitTheme>();
             if (music) { music.volume = musicLevel; music.Play(); }
             Display();
         }
-        public void RollStarted()
+        public bool PastRack(Vector3 position) => launch && rackEnd > 0f &&
+            Vector3.Dot(position - launch.position, launch.forward) > rackEnd;
+
+        public bool CanTake(OrbitBall ball) => !Scoring && balls != null &&
+            !balls.Any(other => other && other != ball && (other.Held || other.ReleasePending)) && !pins.Any(p => p && p.Clearing);
+
+        public bool TryStartRoll(OrbitBall ball)
         {
-            if (nextRack) Rerack(false);
+            if (!CanTake(ball)) return false;
             Throws++;
             Scoring = true;
             lastChange = Time.time;
             Say("Шар в игре");
             Display();
+            return true;
         }
         public void Record(OrbitPin pin)
         {
+            if (!Scoring) return;
             Score += pin.points;
             lastChange = Time.time;
             bool clear = pins.Length > 0 && pins.All(p => !p || p.Down);
             if (clear) Say(Throws == 1 ? "СТРАЙК!" : "Все кегли сбиты!");
             else if (pin.reaction == HitReaction.Celebrate || pin.reaction == HitReaction.Message) Say(pin.message);
-            if (chime) chime.PlayOneShot(clear ? strikeTone : pinTone, clear ? .9f : .32f);
+            var tone = clear ? strikeTone : pinTone;
+            if (chime && tone) chime.PlayOneShot(tone, clear ? .9f : .32f);
             Display();
         }
         void Update()
@@ -58,29 +71,43 @@ namespace OrbitLanes
             if (keyboard != null)
             {
                 if (keyboard.spaceKey.wasPressedThisFrame) Practice();
-                if (keyboard.rKey.wasPressedThisFrame) Restart();
+                if (keyboard.rKey.wasPressedThisFrame)
+                {
+                    if (keyboard.shiftKey.isPressed) Restart();
+                    else ClearLane();
+                }
             }
             if (!Scoring || Time.time - lastChange < settleSeconds) return;
+            if (pins.Any(p => p && p.Clearing)) return;
             bool clear = pins.Length > 0 && pins.All(p => !p || p.Down);
             if (!clear && balls.Any(b => b && b.InFlight)) return;
             Scoring = false;
-            nextRack = clear || Throws >= throwsPerRound;
-            if (!clear) Say(nextRack ? "Новая расстановка" : "Ещё один бросок");
-            if (nextRack) { Rerack(true); }
+            if (clear || Throws >= throwsPerRound)
+            {
+                Round++;
+                Rerack();
+                Say("Новый раунд");
+            }
+            else Say("Ещё один бросок");
             Display();
         }
-        void Rerack(bool returnBalls)
+        public void ClearLane()
         {
-            Round++;
+            // Return the ball. Fallen pins finish their normal clearance before play resumes.
+            foreach (var ball in balls) if (ball) ball.Dock();
+            foreach (var pin in pins) if (pin) pin.ClearIfFallen();
+            if (Scoring) Say("Убираем дорожку");
+        }
+        void Rerack()
+        {
             Throws = 0;
-            nextRack = false;
+            foreach (var b in balls) if (b) b.Dock();
             foreach (var p in pins) if (p) p.Stand();
-            if (returnBalls) foreach (var b in balls) if (b) b.Dock();
         }
         public void Restart()
         {
             Scoring = false;
-            Rerack(true);
+            Rerack();
             Score = 0;
             Round = 1;
             Say("Возьми шар боковой кнопкой");
@@ -88,7 +115,7 @@ namespace OrbitLanes
         }
         public void Practice()
         {
-            if (!launch || balls == null || balls.Any(b => b && (b.InFlight || b.Held))) return;
+            if (Scoring || !launch || balls == null || balls.Any(b => b && (b.InFlight || b.Held || b.ReleasePending))) return;
             var ball = practiceBall ? practiceBall : balls.FirstOrDefault(b => b);
             if (ball) ball.Practice(launch.position, launch.forward);
         }

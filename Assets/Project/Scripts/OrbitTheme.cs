@@ -8,11 +8,16 @@ namespace OrbitLanes
         public SkyStyle theme;
         public Renderer[] panels, accents, planets;
         public Material[] panelColors, accentColors, planetColors;
+        public Material[] skyboxes;
         public void Apply()
         {
             Paint(panels, panelColors);
             Paint(accents, accentColors);
             Paint(planets, planetColors);
+            int index = (int)theme;
+            if (gameObject.scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene() &&
+                skyboxes != null && index >= 0 && index < skyboxes.Length && skyboxes[index])
+                RenderSettings.skybox = skyboxes[index];
         }
         void Paint(Renderer[] objects, Material[] colors)
         {

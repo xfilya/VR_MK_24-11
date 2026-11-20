@@ -5,7 +5,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace OrbitLanes
 {
-    public enum SwitchAction { [InspectorName("Пробный бросок")] Bowl, [InspectorName("Начать заново")] Restart, [InspectorName("Сменить оформление")] Theme, [InspectorName("Вкл. / выкл. музыку")] Music, [InspectorName("Вывести надпись")] Message }
+    public enum SwitchAction { [InspectorName("Пробный бросок")] Bowl, [InspectorName("Убрать дорожку")] ClearLane, [InspectorName("Сменить оформление")] Theme, [InspectorName("Вкл. / выкл. музыку")] Music, [InspectorName("Вывести надпись")] Message, [InspectorName("Начать матч заново")] Restart }
     [RequireComponent(typeof(XRSimpleInteractable))]
     public class OrbitSwitch : MonoBehaviour
     {
@@ -32,7 +32,8 @@ namespace OrbitLanes
             legend.text = action switch
             {
                 SwitchAction.Bowl => "БРОСОК",
-                SwitchAction.Restart => "СБРОС",
+                SwitchAction.ClearLane => "СБРОС",
+                SwitchAction.Restart => "НОВЫЙ МАТЧ",
                 SwitchAction.Theme => "ЦВЕТ",
                 SwitchAction.Music => "ЗВУК",
                 _ => "ТЕКСТ"
@@ -47,6 +48,7 @@ namespace OrbitLanes
                 switch (action)
                 {
                     case SwitchAction.Bowl: club.Practice(); break;
+                    case SwitchAction.ClearLane: club.ClearLane(); break;
                     case SwitchAction.Restart: club.Restart(); break;
                     case SwitchAction.Theme: club.ChangeTheme(); break;
                     case SwitchAction.Music: club.ToggleMusic(); break;

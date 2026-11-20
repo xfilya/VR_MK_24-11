@@ -353,6 +353,7 @@ GameObject:
   - component: {fileID: 6699751814978809724}
   - component: {fileID: 4642096484169569257}
   - component: {fileID: 6815830088326846779}
+  - component: {fileID: 5269005254068886904}
   m_Layer: 0
   m_Name: "\u0411\u0420\u041E\u0421\u041E\u041A"
   m_TagString: Untagged
@@ -400,7 +401,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 18877f71c0bf7394cba2441c23a30938, type: 3}
+  - {fileID: 2100000, guid: 18377cfcead521f40b31413cbe8a3ed7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -446,6 +447,19 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4281872144
+--- !u!114 &5269005254068886904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204410822528536949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e05b741b135afa041aa1cd3fd368562a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitLanes.OrbitWorldText
+  depthMaterial: {fileID: 2100000, guid: 18377cfcead521f40b31413cbe8a3ed7, type: 2}
 --- !u!1 &3696354322198503575
 GameObject:
   m_ObjectHideFlags: 0

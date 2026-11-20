@@ -64,17 +64,39 @@ namespace OrbitLanes.Editor
         public static void Fill(VisualElement root)
         {
             OrbitInspector.Title(root,"ОРБИТА","Конструктор дорожки");
-            var copy = new Button(() =>
-            {
-                if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-                string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Project/Scenes/Моя орбита.unity");
-                if (AssetDatabase.CopyAsset(Scene, path)) EditorSceneManager.OpenScene(path);
-            }) {text="Создать свою копию уровня"};
+            var copy = new Button(CreateWorkshopLevel) {text="Создать пустой уровень"};
             root.Add(copy);
             root.Add(new HelpBox("Перетащи деталь за название на дорожку. Кнопка + ставит её в готовую позицию. Ctrl+Z отменяет действие.", HelpBoxMessageType.Info));
-            Section(root,"Шары",new[]{"Comet","Solar","Nebula"},new[]{"Комета","Мандарин","Туманность"});
+            Section(root,"Заготовки · компоненты добавляем сами",new[]{"StaticBall","StaticPin"},new[]{"Статический шар","Статическая кегля"});
+            Section(root,"Готовые шары",new[]{"Comet","Solar","Nebula"},new[]{"Комета","Мандарин","Туманность"});
             Section(root,"Кегли",new[]{"Classic","Beacon","Rocket","Rack"},new[]{"Классика","Маяк","Ракета","Пирамида из 10"});
-            Section(root,"Пульт и оформление",new[]{"Practice","Reset","Lights","Music","Signal","Decor","Lane"},new[]{"Пробный бросок","Новый матч","Смена темы","Музыка","Своя надпись","Панорама станции","Дорожка"});
+            Section(root,"Пульт и оформление",new[]{"Practice","Reset","Lights","Music","Signal","Decor","Lane"},new[]{"Пробный бросок","Сброс дорожки","Смена темы","Музыка","Своя надпись","Панорама станции","Дорожка"});
+        }
+        static void CreateWorkshopLevel()
+        {
+            if (EditorApplication.isPlaying || !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            string path=AssetDatabase.GenerateUniqueAssetPath("Assets/Project/Scenes/Моя орбита.unity");
+            if (!AssetDatabase.CopyAsset(Scene,path)) return;
+            var scene=EditorSceneManager.OpenScene(path);
+            var club=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<OrbitClub>()).Single();
+            // The XR rig needs a surface even before the class adds the first lane.
+            var deck=GameObject.CreatePrimitive(PrimitiveType.Cube);
+            deck.name="Площадка мастерской";
+            deck.transform.SetParent(club.transform,false);
+            deck.transform.localPosition=new Vector3(0,-.31f,-.5f);
+            deck.transform.localScale=new Vector3(7,.3f,7);
+            deck.GetComponent<Renderer>().sharedMaterial=AssetDatabase.LoadAssetAtPath<Material>("Assets/Project/Art/Materials/Petrol.mat");
+            club.practiceBall=null;
+            club.decor=null;
+            foreach (var t in club.GetComponentsInChildren<Transform>(true))
+            {
+                if (!t || !PrefabUtility.IsAnyPrefabInstanceRoot(t.gameObject)) continue;
+                if (PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(t).StartsWith(Kit,System.StringComparison.Ordinal))
+                    Object.DestroyImmediate(t.gameObject);
+            }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Selection.activeGameObject=club.gameObject;
         }
         static void Section(VisualElement parent,string title,string[] files,string[] names)
         {
@@ -110,34 +132,60 @@ namespace OrbitLanes.Editor
                 Selection.activeGameObject=club.decor.gameObject;
                 return;
             }
-            var go=(GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            var go=(GameObject)PrefabUtility.InstantiatePrefab(prefab,club ? club.transform : null);
             Undo.RegisterCreatedObjectUndo(go,"Добавить "+prefab.name);
             Vector3 slot=Vector3.zero;
             var ball = go.GetComponent<OrbitBall>();
-            if (ball) slot=new Vector3(-.84f,1.01f,.37f);
+            bool isBall=ball || prefab.name=="StaticBall";
+            bool isPin=go.GetComponent<OrbitPin>() || prefab.name=="StaticPin";
+            var button=go.GetComponent<OrbitSwitch>();
+            if (isBall) slot=club && club.ballStand ? club.transform.InverseTransformPoint(club.ballStand.position)+Vector3.up*1.01f : new Vector3(-2.25f,1.01f,-.65f);
             else if (prefab.name=="Lane") slot = Vector3.right * (3.4f * (Object.FindObjectsByType<Transform>().Count(t => t.name == "Lane") - 1));
-            else if (go.GetComponent<OrbitPin>()) slot=new Vector3(.7f,.012f,5.9f);
-            else if (go.name=="Rack") slot=new Vector3(0,.012f,3.8f);
-            else if (go.GetComponent<OrbitSwitch>()) slot=new Vector3(-.75f,.86f,.42f);
-            if (!go.GetComponent<OrbitTheme>())
+            else if (isPin || go.name=="Rack") slot=new Vector3(0,.012f,6.35f);
+            else if (button && club && club.transform.Find("Пульт игрока") is Transform table)
             {
-                var occupied=Object.FindObjectsByType<Transform>();
-                for(int n=0;n<32;n++)
+                PlaceOnConsole(go,table);
+                Selection.activeGameObject=go;
+                return;
+            }
+            else if (button) slot=new Vector3(2.25f,.87f,-.65f);
+            if (isBall || isPin || go.name=="Rack")
+            {
+                var occupied=Object.FindObjectsByType<MeshFilter>().Where(m=>!m.transform.IsChildOf(go.transform)).ToArray();
+                Vector3 start=slot;
+                for(int n=0;;n++)
                 {
+                    if (isBall) slot=start+Vector3.back*(n*.68f);
+                    else if (isPin)
+                    {
+                        int row=Mathf.FloorToInt((Mathf.Sqrt(8*n+1)-1)*.5f);
+                        int column=n-row*(row+1)/2;
+                        slot=start+new Vector3((column-row*.5f)*.32f,0,row*.32f);
+                    }
+                    else slot=start+Vector3.back*(1.65f*n);
                     Vector3 world=club?club.transform.TransformPoint(slot):slot;
-                    bool overlaps=System.Array.Exists(occupied,t=>t!=go.transform && !t.IsChildOf(go.transform) &&
-                        (t.GetComponent<OrbitBall>()||t.GetComponent<OrbitPin>()||t.GetComponent<OrbitSwitch>()) &&
-                        (t.position-world).sqrMagnitude < .28f*.28f);
+                    bool overlaps=occupied.Any(m=>m.sharedMesh && (isBall ? m.sharedMesh.name=="Ball" :
+                        m.GetComponentInParent<OrbitPin>() || m.sharedMesh.name=="Classic") &&
+                        (isBall || isPin ? (m.transform.position-world).sqrMagnitude < (isBall ? .34f*.34f : .28f*.28f) :
+                        Mathf.Abs(m.transform.position.z-world.z)<1.25f));
                     if (!overlaps) break;
-                    slot.z+=ball ? -.49f : .34f;
                 }
             }
             go.transform.position=club?club.transform.TransformPoint(slot):slot;
             PrefabUtility.RecordPrefabInstancePropertyModifications(go.transform);
-            if (ball && club)
+            if (go.TryGetComponent<OrbitTheme>(out var theme) && club)
             {
-                SetPracticeBall(club,ball);
-                if (club.ballStand)
+                Undo.RecordObject(club,"Оформление станции");
+                club.decor=theme;
+                theme.Apply();
+                EditorUtility.SetDirty(club);
+            }
+            if (isBall && club)
+            {
+                if (ball) SetPracticeBall(club,ball);
+                var basePosition=go.transform.position-club.transform.up*1.01f;
+                if (club.ballStand && !club.GetComponentsInChildren<Transform>().Any(t=>
+                    (t==club.ballStand || t.name.StartsWith("Подставка · ")) && (t.position-basePosition).sqrMagnitude<.01f))
                 {
                     var stand = Object.Instantiate(club.ballStand,club.transform);
                     stand.name = "Подставка · " + prefab.name;
@@ -146,6 +194,27 @@ namespace OrbitLanes.Editor
                 }
             }
             Selection.activeGameObject=go;
+        }
+        static void PlaceOnConsole(GameObject go,Transform table)
+        {
+            var buttons=table.GetComponentsInChildren<OrbitSwitch>();
+            int index=0;
+            Vector3 slot;
+            do {
+                slot=new Vector3(index%2==0?-.15f:.15f,.87f,(index/2)*.31f-.13f);
+                index++;
+            } while(buttons.Any(b=>(table.InverseTransformPoint(b.transform.position)-slot).sqrMagnitude<.25f*.25f));
+            Undo.SetTransformParent(go.transform,table,"Кнопка на пульте");
+            go.transform.localPosition=slot;
+            go.transform.localRotation=Quaternion.identity;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(go.transform);
+            var top=table.Find("Панель");
+            if (!top) return;
+            float end=Mathf.Max(top.localPosition.z+top.localScale.z*.5f,slot.z+.16f);
+            float start=top.localPosition.z-top.localScale.z*.5f;
+            Undo.RecordObject(top,"Удлинить пульт");
+            top.localPosition=new Vector3(top.localPosition.x,top.localPosition.y,(start+end)*.5f);
+            top.localScale=new Vector3(top.localScale.x,top.localScale.y,end-start);
         }
         internal static void SetPracticeBall(OrbitClub club,OrbitBall ball)
         {
@@ -221,6 +290,7 @@ namespace OrbitLanes.Editor
         {
             var r=Page("Кегля","Очки начисляются один раз за падение");
             Field(r,"mass","Масса кегли, кг");Field(r,"points","Очки за попадание");
+            Field(r,"clearDelay","До уборки, с");Field(r,"clearDuration","Время исчезновения, с");
             Heading(r,"Когда упадёт");Field(r,"reaction","Что произойдёт");
             MessageField(r,"reaction","Надпись на табло",i => i==(int)HitReaction.Celebrate || i==(int)HitReaction.Message);
             var more=new Foldout{text="Дополнительное событие",value=false};Field(more,"onKnocked","При падении");r.Add(more);return r;

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><title>Стенд колледжа «Царицыно»</title>
+<style>
+@font-face { font-family:Russo; src:url("../../Assets/Project/Art/Type/RussoOne-Regular.ttf"); }
+* { box-sizing:border-box }
+html,body { margin:0; width:1200px; height:1500px; overflow:hidden; }
+body { background:white; color:#171513; font-family:Arial,sans-serif; }
+header { height:242px; display:flex; align-items:center; justify-content:space-between; padding:0 82px; }
+header img { width:396px; }
+header span { font:bold 34px Arial,sans-serif; letter-spacing:5px; }
+.hero { position:relative; height:451px; padding:58px 78px; background:#F2A900; overflow:hidden }
+h1 { position:relative; margin:0; font:118px/.99 Russo,sans-serif; letter-spacing:-3px; }
+.hero svg { position:absolute; right:0; top:0; height:100%; }
+ul { margin:0; padding:30px 80px; list-style:none; }
+li { font:61px/1.1 Russo,sans-serif; padding:24px 0 24px 34px; border-bottom:3px solid #dedbd8; position:relative; }
+li::before { content:""; position:absolute; left:0; top:51px; width:13px; height:13px; background:#CB563D; transform:rotate(45deg); }
+li:last-child { border-bottom:0; }
+footer { height:229px; position:absolute; bottom:0; width:100%; padding:39px 80px; color:white; background:#211c1a; border-top:12px solid #cb563d; }
+footer strong { font:64px/1.1 Russo,sans-serif; }
+footer p { margin:14px 0 0; font:43px Arial,sans-serif; }
+</style>
+<header><img src="College Logo.svg" alt="Колледж Царицыно"><span>МОСКВА</span></header>
+<section class="hero">
+<svg viewBox="0 0 400 451" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+<path fill="#CB563D" d="M400 0H146L400 254ZM400 254H203L400 451Z"/>
+<path fill="#FFF" d="M146 0v126L272 0ZM203 254v98l98-98z"/>
+<path fill="#211c1a" d="M400 0v112L288 0ZM400 451h-97l97-97Z"/>
+</svg><h1>Чему здесь<br>учатся</h1></section>
+<ul><li>Информационные технологии</li><li>Гостеприимство</li><li>Транспорт</li><li>Финансы</li></ul>
+<footer><strong>«Орбита»</strong><p>Учебный VR-проект колледжа</p></footer>
+</html>

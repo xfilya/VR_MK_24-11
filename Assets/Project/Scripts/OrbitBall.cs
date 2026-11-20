@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Filtering;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace OrbitLanes
 {
     [RequireComponent(typeof(Rigidbody), typeof(XRGrabInteractable))]
-    public class OrbitBall : MonoBehaviour
+    public class OrbitBall : MonoBehaviour, IXRSelectFilter
     {
         [Range(.5f, 3f)] public float speed = 1.45f;
         [Range(0, 7)] public float punch = 1.1f;
@@ -16,6 +18,7 @@ namespace OrbitLanes
         public AudioClip impact;
         public bool InFlight { get; private set; }
         public bool Held => grab.isSelected;
+        public bool ReleasePending { get; private set; }
         Rigidbody body;
         XRGrabInteractable grab;
         OrbitClub club;
@@ -28,6 +31,10 @@ namespace OrbitLanes
         {
             body = GetComponent<Rigidbody>();
             grab = GetComponent<XRGrabInteractable>();
+            grab.selectMode = InteractableSelectMode.Single;
+            grab.useDynamicAttach = true;
+            grab.matchAttachPosition = grab.matchAttachRotation = true;
+            grab.forceGravityOnDetach = true;
             home = body.position;
             rotation = body.rotation;
             ApplySettings();
@@ -36,6 +43,11 @@ namespace OrbitLanes
             grab.selectExited.AddListener(Release);
         }
         void Start() => club = FindAnyObjectByType<OrbitClub>();
+        void OnEnable() => grab.selectFilters.Add(this);
+        void OnDisable() => grab.selectFilters.Remove(this);
+        public bool canProcess => isActiveAndEnabled;
+        public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable interactable) =>
+            Held || (!InFlight && (!club || club.CanTake(this)));
         void OnDestroy()
         {
             if (!grab) return;
@@ -51,6 +63,7 @@ namespace OrbitLanes
         }
         void PickUp(SelectEnterEventArgs args)
         {
+            ReleasePending = false;
             InFlight = false;
             dockAfterCancel = false;
             if (ribbon) { ribbon.emitting = false; ribbon.Clear(); }
@@ -58,27 +71,40 @@ namespace OrbitLanes
         void Release(SelectExitEventArgs args)
         {
             if (args.isCanceled) dockAfterCancel = true;
-            else BeginRoll();
+            else ReleasePending = true;
         }
-        void BeginRoll()
+        void LateUpdate()
         {
+            // XRI exits the first hand before it enters the second during a transfer.
+            if (!ReleasePending) return;
+            ReleasePending = false;
+            if (!Held && !BeginRoll()) dockAfterCancel = true;
+        }
+        bool BeginRoll()
+        {
+            if (club && !club.TryStartRoll(this)) return false;
             releaseTime = Time.time;
             InFlight = true;
             body.useGravity = true;
             if (ribbon) { ribbon.Clear(); ribbon.emitting = true; }
-            if (club) club.RollStarted();
+            return true;
         }
         public void Practice(Vector3 from, Vector3 forward)
         {
-            if (Held || InFlight) return;
+            if (Held || InFlight || ReleasePending || !BeginRoll()) return;
             body.position = from;
             body.angularVelocity = Vector3.zero;
-            BeginRoll();
             body.linearVelocity = forward * (5.6f * speed);
         }
         public void Dock()
         {
-            if (Held) return;
+            ReleasePending = false;
+            if (Held)
+            {
+                grab.interactionManager.CancelInteractableSelection((IXRSelectInteractable)grab);
+                dockAfterCancel = true;
+                return;
+            }
             dockAfterCancel = false;
             InFlight = false;
             body.linearVelocity = body.angularVelocity = Vector3.zero;
@@ -93,7 +119,8 @@ namespace OrbitLanes
             if (dockAfterCancel && !Held) Dock();
             if (!InFlight || Held) return;
             float age = Time.time - releaseTime;
-            if (body.position.y < home.y - 3 || age > 11 || (age > 1.7f && body.linearVelocity.sqrMagnitude < .05f)) Dock();
+            if ((club && club.PastRack(body.position)) || body.position.y < home.y - 3 ||
+                age > 11 || (age > 1.7f && body.linearVelocity.sqrMagnitude < .05f)) Dock();
         }
         void OnCollisionEnter(Collision collision)
         {
