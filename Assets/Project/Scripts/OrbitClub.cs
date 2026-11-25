@@ -34,6 +34,7 @@ namespace OrbitLanes
                 rackEnd = pins.Max(p => Vector3.Dot(p.transform.position - launch.position, launch.forward)) + .65f;
             if (!decor) decor = FindAnyObjectByType<OrbitTheme>();
             if (music) { music.volume = musicLevel; music.Play(); }
+            Say("Возьми шар со стойки");
             Display();
         }
         public bool PastRack(Vector3 position) => launch && rackEnd > 0f &&
@@ -115,7 +116,7 @@ namespace OrbitLanes
             Rerack();
             Score = 0;
             Round = 1;
-            Say("Возьми шар боковой кнопкой");
+            Say("Возьми шар со стойки");
             Display();
         }
         public void Practice()

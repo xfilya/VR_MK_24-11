@@ -1,4 +1,9 @@
 using UnityEngine;
+using Unity.XR.CoreUtils;
+#if UNITY_EDITOR
+using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
+#endif
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Filtering;
@@ -26,6 +31,7 @@ namespace OrbitLanes
         Quaternion rotation;
         float releaseTime, nextSound;
         bool dockAfterCancel;
+        Vector3 forwardThrowVelocity;
 
         void Awake()
         {
@@ -41,18 +47,20 @@ namespace OrbitLanes
             body.useGravity = false;
             grab.selectEntered.AddListener(PickUp);
             grab.selectExited.AddListener(Release);
+            grab.activated.AddListener(ThrowFromController);
         }
         void Start() => club = FindAnyObjectByType<OrbitClub>();
         void OnEnable() => grab.selectFilters.Add(this);
         void OnDisable() => grab.selectFilters.Remove(this);
         public bool canProcess => isActiveAndEnabled;
         public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable interactable) =>
-            Held || (!InFlight && (!club || club.CanTake(this)));
+            forwardThrowVelocity == Vector3.zero && (Held || (!InFlight && (!club || club.CanTake(this))));
         void OnDestroy()
         {
             if (!grab) return;
             grab.selectEntered.RemoveListener(PickUp);
             grab.selectExited.RemoveListener(Release);
+            grab.activated.RemoveListener(ThrowFromController);
         }
         void OnValidate() => ApplySettings();
         void ApplySettings()
@@ -63,6 +71,7 @@ namespace OrbitLanes
         }
         void PickUp(SelectEnterEventArgs args)
         {
+            forwardThrowVelocity = Vector3.zero;
             ReleasePending = false;
             InFlight = false;
             dockAfterCancel = false;
@@ -70,8 +79,38 @@ namespace OrbitLanes
         }
         void Release(SelectExitEventArgs args)
         {
-            if (args.isCanceled) dockAfterCancel = true;
+            if (args.isCanceled)
+            {
+                forwardThrowVelocity = Vector3.zero;
+                dockAfterCancel = true;
+            }
             else ReleasePending = true;
+        }
+        void ThrowFromController(ActivateEventArgs args)
+        {
+            if (args.interactorObject is IXRSelectInteractor hand && grab.IsSelected(hand))
+                AimForwardThrow(hand);
+        }
+        void AimForwardThrow(IXRSelectInteractor hand)
+        {
+            var origin = hand.transform.GetComponentInParent<XROrigin>();
+            var aim = origin && origin.Camera ? origin.Camera.transform : hand.transform;
+            var forward = Vector3.ProjectOnPlane(aim.forward, Vector3.up);
+            if (forward.sqrMagnitude < .001f) forward = Vector3.Cross(aim.right, Vector3.up);
+            forwardThrowVelocity = forward.normalized * (5.6f * speed) + Vector3.up * 1.1f;
+        }
+        void Update()
+        {
+            if (!Held) return;
+#if UNITY_EDITOR
+            var keys = Keyboard.current;
+            if (XRInteractionSimulator.instance && keys != null &&
+                (keys.enterKey.wasPressedThisFrame || keys.numpadEnterKey.wasPressedThisFrame))
+                AimForwardThrow(grab.firstInteractorSelecting);
+#endif
+            // Leave XRI's activation callback before asking the manager to end the selection.
+            if (forwardThrowVelocity != Vector3.zero)
+                grab.interactionManager.SelectExit(grab.firstInteractorSelecting, (IXRSelectInteractable)grab);
         }
         void LateUpdate()
         {
@@ -98,6 +137,7 @@ namespace OrbitLanes
         }
         public void Dock()
         {
+            forwardThrowVelocity = Vector3.zero;
             ReleasePending = false;
             if (Held)
             {
@@ -118,6 +158,13 @@ namespace OrbitLanes
         {
             if (dockAfterCancel && !Held) Dock();
             if (!InFlight || Held) return;
+            // XRI writes its tracked-hand release velocity in LateUpdate after detaching.
+            if (forwardThrowVelocity != Vector3.zero)
+            {
+                body.linearVelocity = forwardThrowVelocity;
+                body.angularVelocity = Vector3.zero;
+                forwardThrowVelocity = Vector3.zero;
+            }
             float age = Time.time - releaseTime;
             if ((club && club.PastRack(body.position)) || body.position.y < home.y - 3 ||
                 age > 11 || (age > 1.7f && body.linearVelocity.sqrMagnitude < .05f)) Dock();

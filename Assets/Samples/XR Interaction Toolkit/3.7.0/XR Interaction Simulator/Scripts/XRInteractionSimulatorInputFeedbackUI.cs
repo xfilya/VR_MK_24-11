@@ -571,16 +571,15 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
 
         void ApplyHandHotkeyText(XRInteractionSimulatorState current)
         {
-            string bindingText = current.leftDeviceHotkeyModifierPressed
-                ? current.leftHandExpression.toggleInput.inputActionReferencePerformed.action.GetBindingDisplayString(0)
-                : current.rightHandExpression.toggleInput.inputActionReferencePerformed.action.GetBindingDisplayString(0);
+            var expression = current.leftDeviceHotkeyModifierPressed ? current.leftHandExpression : current.rightHandExpression;
+            string bindingText = XRInteractionSimulatorPlayModeMenu.KeyLabel(expression.toggleInput.inputActionReferencePerformed.action);
             m_HandHotkeyIcon.sprite = current.leftDeviceHotkeyModifierPressed ? m_LeftHandSprite : m_RightHandSprite;
             m_HandHotkeyText.text = bindingText;
         }
 
         void ApplyControllerHotkeyText(XRInputButtonReader inputReader, XRInteractionSimulatorState current)
         {
-            string bindingText = inputReader.inputActionReferencePerformed.action.GetBindingDisplayString(0);
+            string bindingText = XRInteractionSimulatorPlayModeMenu.KeyLabel(inputReader.inputActionReferencePerformed.action);
             m_ControllerHotkeyIcon.sprite = current.leftDeviceHotkeyModifierPressed ? m_LeftControllerSprite : m_RightControllerSprite;
             m_ControllerHotkeyText.text = bindingText;
         }
@@ -762,7 +761,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
                     textUI = textGO.AddComponent<Text>();
                     textUI.fontStyle = FontStyle.Bold;
                 }
-                textUI.text = handExpression.name;
+                textUI.text = XRInteractionSimulatorPlayModeMenu.HandActionLabel(handExpression.name);
 
                 panels[handExpression.name] = panel;
                 bgs[handExpression.name] = bgImage;

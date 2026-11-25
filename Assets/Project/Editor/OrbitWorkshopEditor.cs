@@ -275,7 +275,7 @@ namespace OrbitLanes.Editor
     {
         public override VisualElement CreateInspectorGUI()
         {
-            var r=Page("Шар","Сожми боковую кнопку и отпусти на замахе");
+            var r=Page("Шар","Для броска с места нажми Enter на ПК или курок в шлеме. Для броска с замахом отпусти хват.");
             Field(r,"speed","Скорость броска ×"); Field(r,"punch","Толчок кегли"); Field(r,"mass","Масса шара, кг");Field(r,"trailTime","Длина следа, с");
             var ball=(OrbitBall)target;
             if (ball.gameObject.scene.IsValid() && !EditorApplication.isPlaying)

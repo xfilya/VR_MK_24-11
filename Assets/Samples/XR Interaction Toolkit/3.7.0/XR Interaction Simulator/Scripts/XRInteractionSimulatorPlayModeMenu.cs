@@ -199,8 +199,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
 
         static readonly Color k_DisabledColor = new Color(0x70 / 255f, 0x70 / 255f, 0x70 / 255f);
 
-        const string k_HandsPackageMissingWarning = "Install XR Hands 1.8.0+ to enable Hands.";
-        const string k_HandsPackageUpdateWarning = "Update XR Hands to 1.8.0+ to enable Hands.";
+        const string k_HandsPackageMissingWarning = "Для жестов установите XR Hands 1.8.0 или новее.";
+        const string k_HandsPackageUpdateWarning = "Для жестов обновите XR Hands до версии 1.8.0 или новее.";
 
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
@@ -334,9 +334,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
                     m_RightHandExpressionRow[expression] = rightActionTexts[i].gameObject;
                     m_LeftHandExpressionRow[expression] = leftActionTexts[i].gameObject;
 
-                    rightActionTexts[i].text = expression.name;
+                    rightActionTexts[i].text = HandActionLabel(expression.name);
                     rightBindingTexts[i].text = GetBindingString(expression.toggleInput);
-                    leftActionTexts[i].text = expression.name;
+                    leftActionTexts[i].text = HandActionLabel(expression.name);
                     leftBindingTexts[i].text = GetBindingString(expression.toggleInput);
                 }
                 else
@@ -354,51 +354,51 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
             switch (inputMode)
             {
                 case ControllerInputMode.None:
-                    actionText.text = "None";
+                    actionText.text = "Нет";
                     bindingText.text = "?";
                     break;
                 case ControllerInputMode.Trigger:
-                    actionText.text = "Trigger";
+                    actionText.text = "Курок";
                     bindingText.text = GetBindingString(m_Simulator.triggerInput);
                     break;
                 case ControllerInputMode.Grip:
-                    actionText.text = "Grip";
+                    actionText.text = "Хват";
                     bindingText.text = GetBindingString(m_Simulator.gripInput);
                     break;
                 case ControllerInputMode.PrimaryButton:
-                    actionText.text = "Primary";
+                    actionText.text = "Осн. кнопка";
                     bindingText.text = GetBindingString(m_Simulator.primaryButtonInput);
                     break;
                 case ControllerInputMode.SecondaryButton:
-                    actionText.text = "Secondary";
+                    actionText.text = "Доп. кнопка";
                     bindingText.text = GetBindingString(m_Simulator.secondaryButtonInput);
                     break;
                 case ControllerInputMode.Menu:
-                    actionText.text = "Menu";
+                    actionText.text = "Меню";
                     bindingText.text = GetBindingString(m_Simulator.menuInput);
                     break;
                 case ControllerInputMode.Primary2DAxisClick:
-                    actionText.text = "Prim2DClick";
+                    actionText.text = "Наж. стик 1";
                     bindingText.text = GetBindingString(m_Simulator.primary2DAxisClickInput);
                     break;
                 case ControllerInputMode.Secondary2DAxisClick:
-                    actionText.text = "Sec2DClick";
+                    actionText.text = "Наж. стик 2";
                     bindingText.text = GetBindingString(m_Simulator.secondary2DAxisClickInput);
                     break;
                 case ControllerInputMode.Primary2DAxisTouch:
-                    actionText.text = "Prim2DTouch";
+                    actionText.text = "Кас. стика 1";
                     bindingText.text = GetBindingString(m_Simulator.primary2DAxisTouchInput);
                     break;
                 case ControllerInputMode.Secondary2DAxisTouch:
-                    actionText.text = "Sec2DTouch";
+                    actionText.text = "Кас. стика 2";
                     bindingText.text = GetBindingString(m_Simulator.secondary2DAxisTouchInput);
                     break;
                 case ControllerInputMode.PrimaryTouch:
-                    actionText.text = "PrimTouch";
+                    actionText.text = "Кас. осн.";
                     bindingText.text = GetBindingString(m_Simulator.primaryTouchInput);
                     break;
                 case ControllerInputMode.SecondaryTouch:
-                    actionText.text = "SecTouch";
+                    actionText.text = "Кас. доп.";
                     bindingText.text = GetBindingString(m_Simulator.secondaryTouchInput);
                     break;
                 default:
@@ -406,6 +406,15 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
                     break;
             }
         }
+
+        internal static string HandActionLabel(string expressionName) => expressionName switch
+        {
+            "Idle" => "Покой",
+            "Poke" => "Касание",
+            "Pinch" => "Щипок",
+            "Grab" => "Захват",
+            _ => expressionName
+        };
 
         static string GetBindingString(XRInputButtonReader reader)
         {
@@ -426,7 +435,17 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
                     break;
             }
 
-            return action != null ? action.GetBindingDisplayString(0) : string.Empty;
+            return KeyLabel(action);
+        }
+
+        internal static string KeyLabel(InputAction action)
+        {
+            if (action == null || action.bindings.Count == 0) return string.Empty;
+            const string keyboard = "<Keyboard>/";
+            var path = action.bindings[0].effectivePath;
+            if (path != null && path.Length == keyboard.Length + 1 && path.StartsWith(keyboard, System.StringComparison.OrdinalIgnoreCase))
+                return char.ToUpperInvariant(path[keyboard.Length]).ToString();
+            return action.GetBindingDisplayString(0);
         }
 
         /// <summary>
