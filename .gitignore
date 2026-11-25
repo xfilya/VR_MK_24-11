@@ -110,3 +110,6 @@ InitTestScene*.unity*
 
 # Local editor workspace
 /.vscode/
+
+# Word creates an owner file while a lesson is open.
+/Workshop/~$*.docx

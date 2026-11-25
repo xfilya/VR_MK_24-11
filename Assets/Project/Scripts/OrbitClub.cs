@@ -70,8 +70,13 @@ namespace OrbitLanes
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
-                if (keyboard.spaceKey.wasPressedThisFrame) Practice();
-                if (keyboard.rKey.wasPressedThisFrame)
+                bool legacyKeys = true;
+#if UNITY_EDITOR
+                // Space and R control devices while the simulator is active.
+                legacyKeys = !UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation.XRInteractionSimulator.instance;
+#endif
+                if (keyboard.f7Key.wasPressedThisFrame || (legacyKeys && keyboard.spaceKey.wasPressedThisFrame)) Practice();
+                if (keyboard.f8Key.wasPressedThisFrame || (legacyKeys && keyboard.rKey.wasPressedThisFrame))
                 {
                     if (keyboard.shiftKey.isPressed) Restart();
                     else ClearLane();
