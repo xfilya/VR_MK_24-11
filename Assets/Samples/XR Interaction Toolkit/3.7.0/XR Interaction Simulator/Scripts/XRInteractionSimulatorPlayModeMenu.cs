@@ -34,6 +34,11 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
         [SerializeField]
         GameObject m_ClosedHandActionsMenu;
 
+        [SerializeField]
+        Text m_BowlingControlsHint;
+
+        float m_LastHintPixelsPerUnit;
+
         [Header("Input Readers")]
 
         [SerializeField]
@@ -453,10 +458,25 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.InteractionSimulator
         /// </summary>
         protected void Update()
         {
+            RefreshHintResolution();
             HandleHighlightedDevicePanels();
             HandleHighlightedControllerActionPanels();
             HandleHighlightedHandActionPanels();
             HandleActiveMenus();
+        }
+
+        void RefreshHintResolution()
+        {
+            if (!m_BowlingControlsHint)
+                return;
+
+            // Resizing the Game view can change glyph density without resizing this fixed text box.
+            float density = m_BowlingControlsHint.pixelsPerUnit;
+            if (Mathf.Approximately(density, m_LastHintPixelsPerUnit))
+                return;
+
+            m_LastHintPixelsPerUnit = density;
+            m_BowlingControlsHint.SetVerticesDirty();
         }
 
         /// <summary>
